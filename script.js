@@ -281,16 +281,6 @@ function getGroup(x,y,temp=null){
   return group;
 }
 
-// ตรวจว่ากลุ่มมี liberty อย่างน้อย 1 ช่อง
-function hasGroupLiberty(group,temp=null){
-  const b = temp || board;
-  for(const [x,y] of group){
-    for(const [nx,ny] of getAdjacent(x,y)){
-      if(!b[ny][nx]) return true;
-    }
-  }
-  return false;
-}
 
 // wrapper ให้ชื่อสั้น
 function hasGroupLiberty(groupOrX, maybeTemp){
@@ -616,4 +606,103 @@ function removeObviousAndSuspectedDead(localBoard){
             }
             anyRemoved = true;
           }
- 
+        }
+      }
+    }
+    rounds++;
+  }
+  return removed; // ตำแหน่งที่ถูกลบ (เพื่อใช้เป็น captured count)
+}
+// -------------------- ส่วนที่ 3 --------------------
+// แทนที่ฟังก์ชัน endGame เดิมของคุณด้วยอันนี้ (หรือแทนเฉพาะเนื้อหาภายใน)
+function endGame(){
+  gameEnded = true;
+  // ซ่อนปุ่มควบคุม
+  document.getElementById('passBtn').style.display = 'none';
+  document.getElementById('resignBtn').style.display = 'none';
+  document.getElementById('undoBtn').style.display = 'none';
+  document.getElementById('redoBtn').style.display = 'none';
+
+  // สำเนาบอร์ดหลัก
+  const tempBoard = cloneBoard(board);
+
+  // 1) ลบกลุ่มที่ชัดเจนว่าไม่มี liberty (liberty == 0)
+  // ใช้ logic เดิม (ลักษณะเดียวกับ removeObviousAndSuspectedDead แต่เราจะแยกขั้นตอน)
+  const removedClear = removeObviousAndSuspectedDead(tempBoard); // รวมทั้ง liberty==0 และ liberty<2 heuristic
+  // คำนวณหินที่ถูกจับจากการลบนี้เทียบกับบอร์ดจริง (board)
+  let blackCaptured = 0;
+  let whiteCaptured = 0;
+  for(const [rx,ry] of removedClear){
+    // ตำแหน่งที่ถูกลบ มาจากกลุ่มที่มีหินบน board เดิม
+    if(board[ry][rx] === 'black') blackCaptured++;
+    else if(board[ry][rx] === 'white') whiteCaptured++;
+  }
+
+  // 2) ตอนนี้ tempBoard มีสถานะหลังลบหินตาย (heuristic)
+  //    เราจะคำนวณคะแนนโดยการประเมินพื้นที่ว่างทีละกลุ่ม
+  const visitedEmpty = {};
+  let blackTerritory = 0;
+  let whiteTerritory = 0;
+
+  for(let y=0;y<boardSize;y++){
+    for(let x=0;x<boardSize;x++){
+      const key = `${x},${y}`;
+      if(tempBoard[y][x] == null && !visitedEmpty[key]){
+        const {group, colorSet} = getEmptyGroupForDraw(x,y, visitedEmpty, tempBoard);
+
+        if(colorSet.size === 1){
+          // ถูกรอบโดยสีเดียว -> นับเป็น territory ให้สีที่ครอบ
+          if(colorSet.has('black')) blackTerritory += group.length;
+          else whiteTerritory += group.length;
+        } else if(colorSet.size === 0){
+          // ไม่มีหินรอบ -> เป็นกลาง (ไม่ให้ใคร)
+        } else {
+          // contested area -> ทำ simulation สั้น ๆ ทั้งเติมเป็น black และเติมเป็น white แล้วเปรียบเทียบผล
+          // ได้ผลลัพธ์จาก simulateFillAndScore ซึ่งนับหินและ territory หลังเติมและลบเชลยซ้ำ ๆ
+          const simBlack = simulateFillAndScore(tempBoard, group, 'black');
+          const simWhite = simulateFillAndScore(tempBoard, group, 'white');
+
+          // เปรียบเทียบคะแนนภายในพื้นที่ (เราจะดูผลต่างหิน+territory ที่เกิดขึ้น)
+          const blackGain = (simBlack.blackCount + simBlack.blackTerritory) - (simWhite.blackCount + simWhite.blackTerritory);
+          const whiteGain = (simWhite.whiteCount + simWhite.whiteTerritory) - (simBlack.whiteCount + simBlack.whiteTerritory);
+
+          // ตัดสินใจ: ให้พื้นที่กับฝ่ายที่ได้ประโยชน์มากกว่า (ถ้าผลต่างสูสีก็เป็น neutral)
+          if(blackGain > whiteGain && blackGain - whiteGain > 0.5){
+            blackTerritory += group.length;
+          } else if(whiteGain > blackGain && whiteGain - blackGain > 0.5){
+            whiteTerritory += group.length;
+          } else {
+            // ถ้าไม่ชัดเจน -> ให้เป็นกลาง (ไม่มีใครได้)
+          }
+        }
+      }
+    }
+  }
+
+  // 3) นับหินที่ยังเหลือ (หลังลบ) บน tempBoard
+  let blackAlive = 0, whiteAlive = 0;
+  for(let y=0;y<boardSize;y++){
+    for(let x=0;x<boardSize;x++){
+      if(tempBoard[y][x] === 'black') blackAlive++;
+      else if(tempBoard[y][x] === 'white') whiteAlive++;
+    }
+  }
+
+  // 4) สรุปคะแนน (ตามสไตล์ Japanese counting: territory + captured + komi)
+  let blackScore = blackTerritory + blackAlive + blackCaptured;
+  let whiteScore = whiteTerritory + whiteAlive + whiteCaptured + komi;
+
+  // อัปเดต UI (คะแนน)
+  scoreBlackEl.innerText = 'Score: ' + Number(blackScore.toFixed(1));
+  scoreWhiteEl.innerText = 'Score: ' + Number(whiteScore.toFixed(1));
+
+  // ผลการแข่งขัน
+  let resultText = '';
+  if(blackScore > whiteScore) resultText = `Black wins by ${(blackScore - whiteScore).toFixed(1)} points`;
+  else if(whiteScore > blackScore) resultText = `White wins by ${(whiteScore - blackScore).toFixed(1)} points`;
+  else resultText = `Draw (${blackScore.toFixed(1)} : ${whiteScore.toFixed(1)})`;
+  gameResultEl.innerText = resultText;
+
+  // วาดกระดาน (drawBoard ใช้ logic แสดงโซนตาม board จริง)
+  drawBoard();
+}
