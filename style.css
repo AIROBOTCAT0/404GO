@@ -1,0 +1,79 @@
+/* ธีมสี/ตำแหน่งตามที่ตกลงไว้ */
+:root{
+  --bg:#dcb16c;       /* หน้า */
+  --board-wood:#f4d38e; 
+  --board-wood2:#e5c07b;
+  --line:#000;
+  --player1-bg:#333;
+  --player2-bg:#fff;
+  --btn-blue:#007bff;
+  --btn-green:#28a745;
+  --btn-red:#dc3545;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  font-family: Arial, sans-serif;
+  text-align:center;
+  user-select:none;
+}
+
+/* player boxes (ตำแหน่งด้านบนซ้าย/ขวา) */
+#player1, #player2 {
+    display: none; /* เพิ่มบรรทัดนี้เพื่อซ่อนกรอบก่อนเริ่มเกม */
+}
+.playerBox{
+  position:absolute;
+  top:10px;
+  width:150px;
+  padding:10px;
+  border-radius:10px;
+  box-shadow:0 0 8px rgba(0,0,0,0.3);
+  z-index:10;
+  border:2px solid #333;
+  text-align:center;
+}
+#player1{ left:10px; background:var(--player1-bg); color:#fff; }
+#player2{ right:10px; background:var(--player2-bg); color:#000; }
+
+.playerBox.active{
+  background-color:#a0e0ff;
+  border-color:#0077ff;
+}
+.playerName{ font-weight:bold; }
+.playerScore{ margin-top:5px; }
+
+/* settings */
+#settings{
+  margin-top:70px;
+  padding:10px;
+}
+
+/* canvas (กระดาน) - ให้มี margin-top เท่ากับที่คุณชอบ */
+#goBoard{
+  margin-top:120px; /* เว้นให้ playerBox ไม่ทับ */
+  border-radius:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25);
+  display:block;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* controls (ปุ่ม) */
+.controls{ margin-top:12px; }
+.btn{
+  padding:8px 12px;
+  margin:6px;
+  border:none;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:15px;
+}
+.blue{ background:var(--btn-blue); }
+.green{ background:var(--btn-green); }
+.red{ background:var(--btn-red); }
+
+#gameResult{ margin-top:10px; font-weight:bold; font-size:18px; }
+.turnInfo{ margin-top:6px; font-size:16px; }
