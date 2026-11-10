@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Go Game PVP</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- player profiles (ตำแหน่งเดิม) -->
+  <div id="player1" class="playerBox">
+    <div class="playerName">P1 (Black)</div>
+    <div class="playerScore">Score: 0</div>
+  </div>
+
+  <div id="player2" class="playerBox">
+    <div class="playerName">P2 (White)</div>
+    <div class="playerScore">Score: 0</div>
+  </div>
+
+  <!-- settings -->
+  <div id="settings">
+    <h3>เลือกขนาดกระดาน</h3>
+    <button onclick="setBoardSize(9)">9x9</button>
+    <button onclick="setBoardSize(13)">13x13</button>
+    <button onclick="setBoardSize(19)">19x19</button>
+    <br/><br/>
+    <button onclick="startGame()">เริ่มเกม</button>
+  </div>
+
+  <!-- game scene -->
+  <div id="gameScene" style="display:none;">
+    <canvas id="goBoard"></canvas>
+
+    <div class="controls">
+      <button id="undoBtn" class="btn blue">Undo</button>
+      <button id="redoBtn" class="btn blue">Redo</button>
+      <button id="passBtn" class="btn green">Pass</button>
+      <button id="resignBtn" class="btn red">Resign</button>
+    </div>
+
+    <div id="gameResult"></div>
+    <div class="turnInfo">ผู้เล่นปัจจุบัน: <span id="currentPlayer">ดำ</span></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
