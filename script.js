@@ -706,3 +706,4 @@ function endGame(){
   // วาดกระดาน (drawBoard ใช้ logic แสดงโซนตาม board จริง)
   drawBoard();
 }
+document.getElementById('newGameBtn').addEventListener('click', ()=> location.reload());
