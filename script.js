@@ -657,23 +657,7 @@ function endGame(){
         } else if(colorSet.size === 0){
           // ไม่มีหินรอบ -> เป็นกลาง (ไม่ให้ใคร)
         } else {
-          // contested area -> ทำ simulation สั้น ๆ ทั้งเติมเป็น black และเติมเป็น white แล้วเปรียบเทียบผล
-          // ได้ผลลัพธ์จาก simulateFillAndScore ซึ่งนับหินและ territory หลังเติมและลบเชลยซ้ำ ๆ
-          const simBlack = simulateFillAndScore(tempBoard, group, 'black');
-          const simWhite = simulateFillAndScore(tempBoard, group, 'white');
 
-          // เปรียบเทียบคะแนนภายในพื้นที่ (เราจะดูผลต่างหิน+territory ที่เกิดขึ้น)
-          const blackGain = (simBlack.blackCount + simBlack.blackTerritory) - (simWhite.blackCount + simWhite.blackTerritory);
-          const whiteGain = (simWhite.whiteCount + simWhite.whiteTerritory) - (simBlack.whiteCount + simBlack.whiteTerritory);
-
-          // ตัดสินใจ: ให้พื้นที่กับฝ่ายที่ได้ประโยชน์มากกว่า (ถ้าผลต่างสูสีก็เป็น neutral)
-          if(blackGain > whiteGain && blackGain - whiteGain > 0.5){
-            blackTerritory += group.length;
-          } else if(whiteGain > blackGain && whiteGain - blackGain > 0.5){
-            whiteTerritory += group.length;
-          } else {
-            // ถ้าไม่ชัดเจน -> ให้เป็นกลาง (ไม่มีใครได้)
-          }
         }
       }
     }
