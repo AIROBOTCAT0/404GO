@@ -139,10 +139,11 @@ function drawBoard(){
   if(gameEnded){
     // ไปหาโซนว่างของ board (null) และตรวจสีรอบ ๆ
     const visited = {};
+    const zb = scoreBoard || board;
     for(let y=0;y<boardSize;y++){
       for(let x=0;x<boardSize;x++){
-        if(board[y][x] == null && !visited[`${x},${y}`]){
-          const {group, colorSet} = getEmptyGroupForDraw(x,y, visited, board);
+        if(zb[y][x] == null && !visited[`${x},${y}`]){
+          const {group, colorSet} = getEmptyGroupForDraw(x,y, visited, zb)
           if(colorSet.size === 1){
             // ถูกรอบด้วยสีเดียว -> วาดทึบตามสี
             const isBlack = colorSet.has('black');
@@ -572,12 +573,12 @@ function simulateFillAndScore(boardSnapshot, groupPositions, fillColor){
 // ฟังก์ชันนี้จะทำงานกับ board snapshot ที่ส่งมา ไม่กระทบบอร์ดจริงจนกว่าจะคืนค่า
 function removeObviousAndSuspectedDead(localBoard){
   const removed = [];
-  const visited = {};
   let anyRemoved = true;
   // ทำซ้ำจนเสถียร (บางครั้งการลบกลุ่มหนึ่งจะทำให้กลุ่มอื่นไม่มี liberty)
   let rounds = 0;
   while(anyRemoved && rounds < 8){
     anyRemoved = false;
+    const visited = {};
     for(let y=0;y<boardSize;y++){
       for(let x=0;x<boardSize;x++){
         const key = `${x},${y}`;
