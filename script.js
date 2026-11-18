@@ -11,6 +11,7 @@ const komi = 6.5;
 // สแต็กสถานะสำหรับ Undo/Redo (เก็บ snapshot ของ state)
 let history = []; // array of snapshots
 let redoStack = [];
+let scoreBoard = null;
 
 // DOM
 const settings = document.getElementById('settings');
@@ -45,6 +46,7 @@ function startGame(){
   currentPlayer = 'black';
   passCount = 0;
   gameEnded = false;
+  scoreBoard = null;
 
   currentPlayerEl.innerText = 'ดำ';
   gameResultEl.innerText = '';
