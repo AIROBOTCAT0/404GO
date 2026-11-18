@@ -689,8 +689,8 @@ function endGame(){
   }
 
   // 4) สรุปคะแนน (ตามสไตล์ Japanese counting: territory + captured + komi)
-  let blackScore = blackTerritory + blackAlive + blackCaptured;
-  let whiteScore = whiteTerritory + whiteAlive + whiteCaptured + komi;
+  let blackScore = blackTerritory + blackAlive;
+  let whiteScore = whiteTerritory + whiteAlive + komi;
 
   // อัปเดต UI (คะแนน)
   scoreBlackEl.innerText = 'Score: ' + Number(blackScore.toFixed(1));
@@ -704,6 +704,7 @@ function endGame(){
   gameResultEl.innerText = resultText;
 
   // วาดกระดาน (drawBoard ใช้ logic แสดงโซนตาม board จริง)
+  scoreBoard = tempBoard;
   drawBoard();
 }
 document.getElementById('newGameBtn').addEventListener('click', ()=> location.reload());
